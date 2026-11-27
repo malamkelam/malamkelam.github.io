@@ -240,6 +240,80 @@
     .promotion-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .promotion-piece { padding: 7px 3px; border-color: #ffffff19; border-radius: 10px; background: #ffffff09; font-family: Georgia, serif; font-size: 43px; }
     .promotion-piece:hover { border-color: #e7bd77; background: #e7bd7718; transform: translateY(-2px); }
+    .online-overlay {
+      position: fixed;
+      z-index: 6;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow-y: auto;
+      padding: 20px;
+      background: #091117d9;
+      backdrop-filter: blur(6px);
+    }
+    .online-overlay[hidden], [hidden] { display: none !important; }
+    .online-dialog { width: min(440px, 100%); padding: 22px; border: 1px solid #ffffff20; border-radius: 17px; background: #1d2b34; box-shadow: 0 22px 70px #000b; }
+    .online-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .online-dialog-header h2 { margin: 0; font-size: 18px; }
+    .online-dialog-header p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .online-close { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border: 1px solid #ffffff1a; border-radius: 9px; background: #ffffff08; color: #d6ddd8; cursor: pointer; font-size: 18px; }
+    .online-message { min-height: 18px; margin-bottom: 10px; color: #f0c77f; font-size: 11px; line-height: 1.5; }
+    .online-message.error { color: #f19e83; }
+    .online-form { display: grid; gap: 10px; }
+    .online-field { display: grid; gap: 5px; }
+    .online-field label { color: #b7c1bc; font-size: 10px; font-weight: 700; }
+    .online-field input {
+      width: 100%;
+      min-height: 40px;
+      padding: 0 11px;
+      border: 1px solid #ffffff20;
+      border-radius: 9px;
+      outline: none;
+      background: #121d24;
+      color: #f0eee7;
+      font: inherit;
+      font-size: 12px;
+    }
+    .online-field input:focus { border-color: #c6a36b; box-shadow: 0 0 0 2px #c6a36b25; }
+    .online-primary, .online-secondary {
+      min-height: 39px;
+      padding: 0 13px;
+      border: 1px solid #c6a36b62;
+      border-radius: 9px;
+      background: #c6a36b24;
+      color: #f4e3bf;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 760;
+    }
+    .online-primary:hover, .online-secondary:hover { background: #c6a36b35; }
+    .online-primary:disabled, .online-secondary:disabled { cursor: wait; opacity: .6; }
+    .online-secondary { border-color: #ffffff20; background: #ffffff09; color: #d6ddd8; }
+    .online-auth-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+    .online-auth-actions button { min-height: 36px; border: 0; background: transparent; color: #b7c1bc; cursor: pointer; font-size: 10px; text-decoration: underline; text-underline-offset: 3px; }
+    .online-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: #77868b; font-size: 10px; }
+    .online-divider::before, .online-divider::after { height: 1px; flex: 1; background: #ffffff15; content: ""; }
+    .online-lobby-actions { display: grid; gap: 8px; }
+    .online-join-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .online-room-code {
+      display: inline-flex;
+      min-height: 36px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      border: 1px dashed #c6a36b90;
+      border-radius: 9px;
+      background: #c6a36b12;
+      color: #f5dba8;
+      font-size: 17px;
+      font-weight: 850;
+      letter-spacing: 3px;
+    }
+    .online-room-card { display: grid; gap: 9px; margin: 12px 0; padding: 12px; border: 1px solid #ffffff15; border-radius: 11px; background: #ffffff06; }
+    .online-room-card p { margin: 0; color: #b7c1bc; font-size: 11px; line-height: 1.5; }
+    .online-room-chip { display: flex; align-items: center; gap: 7px; padding: 0 9px; border: 1px solid #c6a36b55; border-radius: 8px; background: #c6a36b15; color: #cbb98e; font-size: 10px; }
+    .online-room-chip code { color: #f5dba8; font-size: 11px; font-weight: 850; letter-spacing: 1px; }
+    .online-room-chip button { border: 0; background: none; color: #e7d5ad; cursor: pointer; font-size: 10px; text-decoration: underline; }
     @media (min-width: 940px) { .piece { font-size: clamp(42px, 5.2vw, 64px); } }
     @media (max-width: 840px) {
       .app { padding: 20px 16px 30px; }
@@ -307,6 +381,7 @@
               <div class="game-subtitle" id="game-subtitle">Kamu bermain sebagai Putih</div>
             </div>
             <div class="bar-actions">
+              <div class="online-room-chip" id="online-room-chip" hidden><span>ROOM</span><code id="online-room-code"></code><button id="copy-room-code" type="button">Salin</button></div>
               <button class="small-button" id="undo" type="button" title="Batalkan langkah terakhir" disabled>↶ <span class="undo-label">Undo</span></button>
               <button class="small-button" id="new-game" type="button">＋ <span class="new-label">Game baru</span></button>
             </div>
@@ -347,6 +422,9 @@
             <button class="mode-card" type="button" data-mode="puzzle">
               <span class="mode-icon">🧩</span><span><span class="mode-name">Puzzle skakmat</span><span class="mode-description">Temukan skakmat dalam 1 langkah</span></span>
             </button>
+            <button class="mode-card" type="button" data-mode="online">
+              <span class="mode-icon">🌐</span><span><span class="mode-name">Multiplayer online</span><span class="mode-description">Main berdua lewat kode room</span></span>
+            </button>
           </div>
           <div class="settings" id="difficulty-settings">
             <label class="settings-label" for="difficulty">Kekuatan bot</label>
@@ -384,6 +462,63 @@
     </div>
   </div>
 
+  <div class="online-overlay" id="online-overlay" hidden>
+    <section class="online-dialog" role="dialog" aria-modal="true" aria-labelledby="online-title">
+      <header class="online-dialog-header">
+        <div>
+          <h2 id="online-title">Multiplayer Online</h2>
+          <p>Masuk dengan username atau main sebagai tamu. Supabase Auth menangani password; akun username tanpa email tidak bisa reset password.</p>
+        </div>
+        <button class="online-close" id="online-close" type="button" aria-label="Tutup">×</button>
+      </header>
+      <div id="online-auth-panel">
+        <div class="online-message" id="online-message" role="status" aria-live="polite"></div>
+        <form class="online-form" id="online-auth-form">
+          <div class="online-field">
+            <label for="online-username">Username (3–20 karakter: huruf, angka, underscore)</label>
+            <input id="online-username" name="username" autocomplete="username" minlength="3" maxlength="20" required>
+          </div>
+          <div class="online-field">
+            <label for="online-password">Password</label>
+            <input id="online-password" name="password" type="password" autocomplete="current-password" minlength="8" required>
+          </div>
+          <div class="online-field" id="online-confirm-field" hidden>
+            <label for="online-confirm-password">Ulangi password</label>
+            <input id="online-confirm-password" name="confirm-password" type="password" autocomplete="new-password" minlength="8">
+          </div>
+          <button class="online-primary" id="online-submit" type="submit">Masuk</button>
+        </form>
+        <div class="online-auth-actions">
+          <button id="online-toggle-register" type="button">Belum punya akun? Daftar</button>
+          <button id="online-guest" type="button">Lanjut sebagai tamu</button>
+        </div>
+      </div>
+      <div id="online-lobby-panel" hidden>
+        <div class="online-message" id="online-lobby-message" role="status" aria-live="polite"></div>
+        <div class="online-field">
+          <label for="online-display-name">Kamu bermain sebagai</label>
+          <input id="online-display-name" readonly>
+        </div>
+        <div class="online-room-card" id="online-active-room" hidden>
+          <p>Bagikan kode ini ke temanmu untuk bergabung ke pertandingan.</p>
+          <span class="online-room-code" id="online-active-code"></span>
+          <button class="online-secondary" id="online-copy-code" type="button">Salin kode room</button>
+        </div>
+        <div class="online-lobby-actions">
+          <button class="online-primary" id="online-create-room" type="button">Buat room baru</button>
+          <div class="online-divider">atau gabung pakai kode</div>
+          <div class="online-join-row">
+            <div class="online-field"><label for="online-join-code">Kode room</label><input id="online-join-code" maxlength="8" autocomplete="off" placeholder="8 karakter"></div>
+            <button class="online-secondary" id="online-join-room" type="button">Gabung</button>
+          </div>
+          <button class="online-secondary" id="online-sign-out" type="button">Keluar dari akun</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script src="/supabase-config.js"></script>
   <script src="/chess.js"></script>
   <script>
     (() => {
@@ -400,7 +535,8 @@
         bot: { title: "Lawan Komputer", subtitle: "Kamu bermain sebagai Putih", black: "Komputer", blackNote: "Hitam · lawan" },
         local: { title: "2 Pemain Lokal", subtitle: "Bermain bergantian di satu perangkat", black: "Pemain 2", blackNote: "Hitam · pemain" },
         blitz: { title: "Blitz 5 Menit", subtitle: "Lawan komputer · bonus 3 detik per langkah", black: "Komputer", blackNote: "Hitam · lawan" },
-        puzzle: { title: "Puzzle Skakmat", subtitle: "Putih jalan dan menang dalam satu langkah", black: "Lawan", blackNote: "Hitam · raja lawan" }
+        puzzle: { title: "Puzzle Skakmat", subtitle: "Putih jalan dan menang dalam satu langkah", black: "Lawan", blackNote: "Hitam · raja lawan" },
+        online: { title: "Multiplayer Online", subtitle: "Main catur online bersama teman", black: "Menunggu pemain", blackNote: "Hitam · lawan" }
       };
       const puzzleFen = "7k/5Q2/6K1/8/8/8/8/8 w - - 0 1";
       const puzzleAnswer = { from: "f7", to: "f8" };
@@ -423,10 +559,351 @@
       let clockStamp = performance.now();
       let clockInterval = null;
       let puzzleSolved = false;
+      let onlineClient = null;
+      let onlineUser = null;
+      let onlineUsername = "";
+      let onlineRoom = null;
+      let onlineSide = null;
+      let onlineChannel = null;
+      let onlineVersion = 0;
+      let onlineMovePending = false;
+      let onlineRegisterMode = false;
 
       const $ = selector => document.querySelector(selector);
       const squareId = square => Chess.squareName(square);
       const positionKey = position => Chess.toFEN(position).split(" ").slice(0, 4).join(" ");
+
+      function getOnlineClient() {
+        const config = window.RUANG_Catur_SUPABASE;
+        if (!window.supabase?.createClient) throw new Error("Library multiplayer belum termuat. Muat ulang halaman dan coba lagi.");
+        if (!config?.url || !config?.anonKey) throw new Error("Backend online belum dikonfigurasi. Dibutuhkan project URL dan public anon key Supabase.");
+        onlineClient ||= window.supabase.createClient(config.url, config.anonKey);
+        return onlineClient;
+      }
+
+      function setOnlineMessage(elementId, message, isError = false) {
+        const element = $(`#${elementId}`);
+        element.textContent = message;
+        element.classList.toggle("error", isError);
+      }
+
+      function showOnlineAuth() {
+        $("#online-auth-panel").hidden = false;
+        $("#online-lobby-panel").hidden = true;
+      }
+
+      function showOnlineLobby() {
+        $("#online-auth-panel").hidden = true;
+        $("#online-lobby-panel").hidden = false;
+        $("#online-display-name").value = onlineUsername;
+        $("#online-active-room").hidden = !onlineRoom;
+        $("#online-active-code").textContent = onlineRoom?.id || "";
+        $("#online-join-code").value = "";
+      }
+
+      function setActiveMode(selectedMode) {
+        document.querySelectorAll(".mode-card").forEach(button => {
+          button.classList.toggle("active", button.dataset.mode === selectedMode);
+        });
+      }
+
+      async function openOnlinePanel() {
+        setActiveMode("online");
+        $("#online-overlay").hidden = false;
+        showOnlineAuth();
+        setOnlineMessage("online-message", "");
+        setOnlineMessage("online-lobby-message", "");
+        try {
+          const { data, error } = await getOnlineClient().auth.getSession();
+          if (error) throw error;
+          if (data.session?.user) await useOnlineUser(data.session.user);
+        } catch (error) {
+          showOnlineAuth();
+          setOnlineMessage("online-message", error.message, true);
+        }
+      }
+
+      function closeOnlinePanel() {
+        $("#online-overlay").hidden = true;
+        if (mode !== "online") setActiveMode(mode);
+      }
+
+      async function useOnlineUser(user) {
+        onlineUser = user;
+        const client = getOnlineClient();
+        const { data, error } = await client
+          .from("chess_profiles")
+          .select("username")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (error) throw error;
+        onlineUsername = data?.username || user.user_metadata?.username || `Guest_${user.id.slice(0, 8)}`;
+        showOnlineLobby();
+      }
+
+      function usernameEmail(username) {
+        return `${username.toLowerCase()}@players.ruangcatur.invalid`;
+      }
+
+      async function submitOnlineAuth(event) {
+        event.preventDefault();
+        const username = $("#online-username").value.trim().toLowerCase();
+        const password = $("#online-password").value;
+        const submit = $("#online-submit");
+        if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+          setOnlineMessage("online-message", "Username harus 3–20 karakter: huruf kecil, angka, atau underscore.", true);
+          return;
+        }
+        if (password.length < 8) {
+          setOnlineMessage("online-message", "Password minimal 8 karakter.", true);
+          return;
+        }
+
+        submit.disabled = true;
+        setOnlineMessage("online-message", onlineRegisterMode ? "Membuat akun..." : "Memeriksa akun...");
+        try {
+          const auth = getOnlineClient().auth;
+          let data;
+          let error;
+          if (onlineRegisterMode) {
+            if (password !== $("#online-confirm-password").value) throw new Error("Konfirmasi password belum cocok.");
+            ({ data, error } = await auth.signUp({
+              email: usernameEmail(username),
+              password,
+              options: { data: { username } }
+            }));
+            if (error) throw error;
+            if (!data.session) throw new Error("Akun dibuat, tetapi konfirmasi email masih aktif. Matikan Confirm email di pengaturan Supabase Auth untuk login username.");
+          } else {
+            ({ data, error } = await auth.signInWithPassword({ email: usernameEmail(username), password }));
+            if (error) throw error;
+          }
+          await useOnlineUser(data.user);
+          setOnlineMessage("online-lobby-message", `Berhasil masuk sebagai ${onlineUsername}.`);
+        } catch (error) {
+          setOnlineMessage("online-message", error.message || "Login gagal. Periksa username dan password.", true);
+        } finally {
+          submit.disabled = false;
+        }
+      }
+
+      async function continueAsGuest() {
+        const button = $("#online-guest");
+        button.disabled = true;
+        setOnlineMessage("online-message", "Menyiapkan akun tamu...");
+        try {
+          const { data, error } = await getOnlineClient().auth.signInAnonymously();
+          if (error) throw error;
+          await useOnlineUser(data.user);
+          setOnlineMessage("online-lobby-message", `Kamu masuk sebagai ${onlineUsername}.`);
+        } catch (error) {
+          setOnlineMessage("online-message", error.message || "Mode tamu belum tersedia.", true);
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      function parseSquareName(name) {
+        if (typeof name !== "string" || !/^[a-h][1-8]$/.test(name)) return null;
+        return { row: 8 - Number(name[1]), col: name.charCodeAt(0) - 97 };
+      }
+
+      function installOnlineRoom(room) {
+        if (!room || !onlineUser) throw new Error("Data room tidak lengkap.");
+        const isNewRoom = onlineRoom?.id !== room.id;
+        onlineRoom = room;
+        onlineVersion = Number(room.version) || 0;
+        onlineSide = room.white_player === onlineUser.id ? "w" : room.black_player === onlineUser.id ? "b" : null;
+        if (!onlineSide) throw new Error("Akun ini bukan pemain di room tersebut.");
+        mode = "online";
+        gameVersion++;
+        clearTimeout(botTimer);
+        clearInterval(clockInterval);
+        botThinking = false;
+        onlineMovePending = false;
+        selected = null;
+        selectedMoves = [];
+        lastMove = null;
+        repetitions = {};
+        try {
+          state = Chess.fromFEN(room.fen);
+        } catch (error) {
+          throw new Error(`Posisi room tidak valid: ${error.message}`);
+        }
+        moves = (Array.isArray(room.moves) ? room.moves : []).map(move => ({
+          color: move.color === "b" ? "b" : "w",
+          text: String(move.text || "").slice(0, 32),
+          from: parseSquareName(move.from),
+          to: parseSquareName(move.to)
+        }));
+        snapshots = [{ state: Chess.copyState(state), moves: moves.slice() }];
+        const last = moves.at(-1);
+        if (last?.from && last?.to) lastMove = { from: last.from, to: last.to };
+        const result = evaluatePosition();
+        gameOver = room.status === "finished" || Boolean(result && !result.check);
+        $("#result-banner").textContent = room.status === "finished" ? "Pertandingan telah berakhir." : gameOver ? result.text : "";
+        setActiveMode("online");
+        showOnlineLobby();
+        $("#online-overlay").hidden = true;
+        render();
+        if (isNewRoom) subscribeToOnlineRoom(room.id);
+      }
+
+      function subscribeToOnlineRoom(roomId) {
+        const client = getOnlineClient();
+        if (onlineChannel) client.removeChannel(onlineChannel);
+        onlineChannel = client
+          .channel(`chess-room-${roomId}`)
+          .on("postgres_changes", {
+            event: "UPDATE",
+            schema: "public",
+            table: "chess_rooms",
+            filter: `id=eq.${roomId}`
+          }, payload => {
+            try {
+              installOnlineRoom(payload.new);
+            } catch (error) {
+              setOnlineMessage("online-lobby-message", error.message, true);
+            }
+          })
+          .subscribe(status => {
+            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+              setOnlineMessage("online-lobby-message", "Koneksi realtime terputus. Muat ulang halaman untuk mencoba lagi.", true);
+            }
+          });
+      }
+
+      function roomFromRpc(data) {
+        const room = Array.isArray(data) ? data[0] : data;
+        if (!room?.id) throw new Error("Server tidak mengembalikan room.");
+        return room;
+      }
+
+      async function createOnlineRoom() {
+        const button = $("#online-create-room");
+        button.disabled = true;
+        setOnlineMessage("online-lobby-message", "Membuat room...");
+        try {
+          if (onlineRoom) leaveOnlineRoom();
+          const { data, error } = await getOnlineClient().rpc("create_chess_room");
+          if (error) throw error;
+          installOnlineRoom(roomFromRpc(data));
+        } catch (error) {
+          setOnlineMessage("online-lobby-message", error.message || "Room gagal dibuat.", true);
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      async function joinOnlineRoom() {
+        const code = $("#online-join-code").value.trim().toUpperCase();
+        if (!/^[0-9A-F]{8}$/.test(code)) {
+          setOnlineMessage("online-lobby-message", "Masukkan kode room 8 karakter yang valid.", true);
+          return;
+        }
+        const button = $("#online-join-room");
+        button.disabled = true;
+        setOnlineMessage("online-lobby-message", "Mencari room...");
+        try {
+          if (onlineRoom) leaveOnlineRoom();
+          const { data, error } = await getOnlineClient().rpc("join_chess_room", { p_room_id: code });
+          if (error) throw error;
+          installOnlineRoom(roomFromRpc(data));
+        } catch (error) {
+          setOnlineMessage("online-lobby-message", error.message || "Tidak bisa bergabung ke room.", true);
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      async function copyRoomCode() {
+        if (!onlineRoom?.id) return;
+        try {
+          await navigator.clipboard.writeText(onlineRoom.id);
+          setOnlineMessage("online-lobby-message", "Kode room disalin.");
+        } catch {
+          setOnlineMessage("online-lobby-message", `Bagikan kode ini: ${onlineRoom.id}`);
+        }
+      }
+
+      function leaveOnlineRoom() {
+        const room = onlineRoom;
+        const client = onlineClient;
+        if (onlineChannel && client) client.removeChannel(onlineChannel);
+        onlineChannel = null;
+        onlineRoom = null;
+        onlineSide = null;
+        onlineVersion = 0;
+        onlineMovePending = false;
+        if (room && client && onlineUser) {
+          client.rpc("leave_chess_room", { p_room_id: room.id }).then(({ error }) => {
+            if (error) console.error("Could not close the online chess room:", error.message);
+          }).catch(error => {
+            console.error("Could not close the online chess room:", error.message);
+          });
+        }
+      }
+
+      async function signOutOnline() {
+        try {
+          const client = getOnlineClient();
+          leaveOnlineRoom();
+          const { error } = await client.auth.signOut();
+          if (error) throw error;
+          onlineUser = null;
+          onlineUsername = "";
+          resetGame("bot");
+          showOnlineAuth();
+          setOnlineMessage("online-message", "Kamu sudah keluar dari akun.");
+        } catch (error) {
+          setOnlineMessage("online-lobby-message", error.message, true);
+        }
+      }
+
+      async function submitOnlineMove(move, promotion) {
+        if (!onlineRoom || onlineRoom.status !== "playing" || onlineSide !== state.turn || onlineMovePending) {
+          setOnlineMessage("online-lobby-message", onlineRoom?.status === "waiting" ? "Tunggu lawan bergabung sebelum melangkah." : "Saat ini bukan giliranmu.");
+          return;
+        }
+        const movingColor = state.turn;
+        const moveText = algebraic(move, promotion);
+        const nextState = Chess.playMove(state, move, promotion);
+        const moveRecord = {
+          color: movingColor,
+          text: moveText,
+          from: squareId(move.from),
+          to: squareId(move.to),
+          promotion: move.promotion ? promotion : null
+        };
+        onlineMovePending = true;
+        selected = null;
+        selectedMoves = [];
+        renderStatus();
+        try {
+          const { data, error } = await getOnlineClient().rpc("make_chess_move", {
+            p_room_id: onlineRoom.id,
+            p_expected_version: onlineVersion,
+            p_fen: Chess.toFEN(nextState),
+            p_move: moveRecord
+          });
+          if (error) throw error;
+          installOnlineRoom(roomFromRpc(data));
+        } catch (error) {
+          onlineMovePending = false;
+          try {
+            const { data, error: syncError } = await getOnlineClient()
+              .from("chess_rooms")
+              .select("*")
+              .eq("id", onlineRoom.id)
+              .single();
+            if (!syncError && data) installOnlineRoom(data);
+          } catch (syncError) {
+            console.error("Could not sync the online chess room:", syncError.message);
+          }
+          setOnlineMessage("online-lobby-message", error.message || "Langkah gagal dikirim.", true);
+          render();
+        }
+      }
 
       function currentModeIsBot() {
         return mode === "bot" || mode === "blitz";
@@ -471,6 +948,9 @@
 
       function renderMoves() {
         const list = $("#move-list");
+        const escapeHtml = value => String(value || "").replace(/[&<>"']/g, character => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+        })[character]);
         if (!moves.length) {
           list.innerHTML = `<div class="move-placeholder">${mode === "puzzle" ? "Cari langkah yang menghasilkan skakmat." : "Langkahmu akan muncul di sini setelah permainan dimulai."}</div>`;
         } else {
@@ -478,7 +958,7 @@
           for (let i = 0; i < moves.length; i += 2) {
             const white = moves[i];
             const black = moves[i + 1];
-            rows.push(`<div class="move-row"><span class="move-number">${Math.floor(i / 2) + 1}.</span><span class="move-cell${i === moves.length - 1 ? " latest" : ""}">${white.text}</span><span class="move-cell${i + 1 === moves.length - 1 ? " latest" : ""}">${black?.text || ""}</span></div>`);
+            rows.push(`<div class="move-row"><span class="move-number">${Math.floor(i / 2) + 1}.</span><span class="move-cell${i === moves.length - 1 ? " latest" : ""}">${escapeHtml(white.text)}</span><span class="move-cell${i + 1 === moves.length - 1 ? " latest" : ""}">${escapeHtml(black?.text)}</span></div>`);
           }
           list.innerHTML = rows.join("");
           list.scrollTop = list.scrollHeight;
@@ -492,7 +972,15 @@
         const turnName = state.turn === "w" ? "Putih" : "Hitam";
         const dot = $("#turn-dot");
         dot.className = `turn-dot${state.turn === "b" ? " black" : ""}`;
-        $("#turn-status").textContent = gameOver ? $("#result-banner").textContent : botThinking ? "Komputer berpikir..." : `Giliran ${turnName}`;
+        let turnStatus = `Giliran ${turnName}`;
+        if (mode === "online") {
+          if (onlineRoom?.status === "waiting") turnStatus = "Menunggu lawan bergabung";
+          else if (onlineMovePending) turnStatus = "Mengirim langkah...";
+          else turnStatus = onlineSide === state.turn ? "Giliranmu" : "Giliran lawan";
+        } else if (botThinking) {
+          turnStatus = "Komputer berpikir...";
+        }
+        $("#turn-status").textContent = gameOver ? $("#result-banner").textContent : turnStatus;
         const status = Chess.positionStatus(state);
         $("#check-label").hidden = gameOver || !status.check;
         renderClock();
@@ -522,20 +1010,26 @@
           const description = piece ? `${piece.color === "w" ? "Putih" : "Hitam"} ${pieceNames[piece.type]}` : "Kosong";
           element.setAttribute("aria-label", `${"abcdefgh"[col]}${8 - row}, ${description}${moveTarget ? ", langkah legal" : ""}`);
         }
-        $("#white-name").textContent = mode === "local" ? "Pemain 1" : "Kamu";
-        $("#black-name").textContent = modeDetails[mode].black;
-        $("#black-note").textContent = modeDetails[mode].blackNote;
+        $("#white-name").textContent = mode === "online" ? (onlineRoom?.white_name || "Pemain Putih") : mode === "local" ? "Pemain 1" : "Kamu";
+        $("#black-name").textContent = mode === "online" ? (onlineRoom?.black_name || "Menunggu pemain") : modeDetails[mode].black;
+        $("#black-note").textContent = mode === "online" ? "Hitam · lawan" : modeDetails[mode].blackNote;
         $("#game-title").textContent = modeDetails[mode].title;
-        $("#game-subtitle").textContent = modeDetails[mode].subtitle;
-        $("#white-note").textContent = mode === "local" ? "Putih · pemain 1" : mode === "puzzle" ? "Putih · cari skakmat" : "Putih · giliran pertama";
+        $("#game-subtitle").textContent = mode === "online" && onlineRoom
+          ? `Room ${onlineRoom.id} · ${onlineRoom.status === "waiting" ? "menunggu lawan" : onlineSide === "w" ? "kamu Putih" : "kamu Hitam"}`
+          : modeDetails[mode].subtitle;
+        $("#white-note").textContent = mode === "online" ? "Putih · pemain" : mode === "local" ? "Putih · pemain 1" : mode === "puzzle" ? "Putih · cari skakmat" : "Putih · giliran pertama";
         $("#difficulty-settings").hidden = !currentModeIsBot();
-        $("#undo").disabled = snapshots.length <= 1 || gameOver && mode === "puzzle";
+        $("#undo").disabled = mode === "online" || snapshots.length <= 1 || gameOver && mode === "puzzle";
+        $(".new-label").textContent = mode === "online" ? "Lobi" : "Game baru";
+        $("#online-room-chip").hidden = mode !== "online" || !onlineRoom;
+        $("#online-room-code").textContent = onlineRoom?.id || "";
         $("#result-banner").classList.toggle("show", gameOver);
         renderStatus();
         renderMoves();
       }
 
       function resetGame(nextMode = mode) {
+        if (mode === "online" && nextMode !== "online") leaveOnlineRoom();
         gameVersion++;
         clearTimeout(botTimer);
         clearInterval(clockInterval);
@@ -566,6 +1060,7 @@
       function onSquareClick(event) {
         if (gameOver || botThinking || pendingPromotion) return;
         if (currentModeIsBot() && state.turn === "b") return;
+        if (mode === "online" && (!onlineRoom || onlineRoom.status !== "playing" || onlineSide !== state.turn || onlineMovePending)) return;
         const square = { row: Number(event.currentTarget.dataset.row), col: Number(event.currentTarget.dataset.col) };
         const piece = state.board[square.row][square.col];
         const targetMove = selectedMoves.find(move => move.to.row === square.row && move.to.col === square.col);
@@ -612,6 +1107,10 @@
       }
 
       function commitMove(move, promotion = "q") {
+        if (mode === "online") {
+          submitOnlineMove(move, promotion);
+          return;
+        }
         const movingColor = state.turn;
         const moveText = algebraic(move, promotion);
         const previous = state;
@@ -791,9 +1290,34 @@
         render();
       }
 
-      document.querySelectorAll(".mode-card").forEach(button => button.addEventListener("click", () => resetGame(button.dataset.mode)));
-      $("#new-game").addEventListener("click", () => resetGame(mode));
+      document.querySelectorAll(".mode-card").forEach(button => button.addEventListener("click", () => {
+        if (button.dataset.mode === "online") {
+          openOnlinePanel();
+          return;
+        }
+        resetGame(button.dataset.mode);
+      }));
+      $("#new-game").addEventListener("click", () => mode === "online" ? openOnlinePanel() : resetGame(mode));
       $("#undo").addEventListener("click", undoMove);
+      $("#online-auth-form").addEventListener("submit", submitOnlineAuth);
+      $("#online-toggle-register").addEventListener("click", () => {
+        onlineRegisterMode = !onlineRegisterMode;
+        $("#online-confirm-field").hidden = !onlineRegisterMode;
+        $("#online-password").autocomplete = onlineRegisterMode ? "new-password" : "current-password";
+        $("#online-submit").textContent = onlineRegisterMode ? "Buat akun" : "Masuk";
+        $("#online-toggle-register").textContent = onlineRegisterMode ? "Sudah punya akun? Masuk" : "Belum punya akun? Daftar";
+        setOnlineMessage("online-message", "");
+      });
+      $("#online-guest").addEventListener("click", continueAsGuest);
+      $("#online-create-room").addEventListener("click", createOnlineRoom);
+      $("#online-join-room").addEventListener("click", joinOnlineRoom);
+      $("#online-sign-out").addEventListener("click", signOutOnline);
+      $("#online-close").addEventListener("click", closeOnlinePanel);
+      $("#online-overlay").addEventListener("click", event => {
+        if (event.target === $("#online-overlay")) closeOnlinePanel();
+      });
+      $("#online-copy-code").addEventListener("click", copyRoomCode);
+      $("#copy-room-code").addEventListener("click", copyRoomCode);
       document.querySelectorAll(".promotion-piece").forEach(button => button.addEventListener("click", () => {
         if (!pendingPromotion) return;
         const move = pendingPromotion;
